@@ -3,6 +3,7 @@ import urllib
 import scipy
 import random
 import collections
+from nltk.stem.porter import *
 
 print("Reading data...")
 data = list(open("test.tsv"))
@@ -19,15 +20,17 @@ for eachline in f:
 f.close()
     
 #start to calcu
+stemmer = PorterStemmer()
 fw = open("predict.csv", 'w')
 fw.write("PhraseId,Sentiment\n")
 for each in data[1:]:
     split = each.split('\t')
     phrase = split[2]
     totalScore = 2
-    for each_token in phrase.split():
-        if each_token in dictionary:      
-            totalScore += int(dictionary[each_token])
+    for each_token in phrase.lower().split():
+        stem_token = stemmer.stem(each_token)
+        if stem_token in dictionary:      
+            totalScore += int(dictionary[stem_token])
         else:
             totalScore += 2
     
