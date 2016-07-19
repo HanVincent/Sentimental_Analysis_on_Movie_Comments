@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Spyder Editor
+
+This is a temporary script file.
+"""
+
 import numpy
 import urllib
 import scipy.optimize
@@ -87,6 +94,11 @@ y = [d['review/overall'] for d in data]
 
 #With regularization
 clf = linear_model.Ridge(1.0, fit_intercept=False)
+print(clf)
+print(X)
+print(y)
 clf.fit(X, y)
 theta = clf.coef_
+print(theta)
 predictions = clf.predict(X)
+print(predictions)

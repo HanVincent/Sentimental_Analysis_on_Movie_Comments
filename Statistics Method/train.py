@@ -17,7 +17,7 @@ def getFrequent(value):#value:[1,4,2,2,5,3,2]
     return common
         
 print("Reading data...")
-data = list(open("train.tsv", "r"))
+data = list(open("../train.tsv", "r"))
 print("done!")
 
 ###record each word and its sentiment
@@ -26,16 +26,17 @@ dict_statistics = collections.defaultdict(list)
 
 ###grab each word's sentiment, stemming and lowercase
 
-stemmer = PorterStemmer()
+#stemmer = PorterStemmer()
 for each in data[1:]:
     splitLine = each.split('\t')
-    #phrase = splitLine[2].split()
-    phrase = splitLine[2].lower().split()
-    phrase = [word for word in phrase if word not in stopwords.words('english')]
+    phrase = splitLine[2].split()
+    #phrase = splitLine[2].lower().split()
+    #phrase = [word for word in phrase if word not in stopwords.words('english')]
     for each_token in phrase:
-        stemmed_word = stemmer.stem(each_token)
-        dict_statistics[stemmed_word].append(splitLine[3].strip())
+        #stemmed_word = stemmer.stem(each_token)
+        dict_statistics[each_token].append(splitLine[3].strip())
 
+print(len(dict_statistics))
 ###real dictionary for sentiment
 dict_token = collections.defaultdict(int)
 
