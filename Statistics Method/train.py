@@ -17,7 +17,7 @@ def getFrequent(value):#value:[1,4,2,2,5,3,2]
     return common
         
 print("Reading data...")
-data = list(open("../train.tsv", "r"))
+data = list(open("../train.tsv", "r"))ㄋ
 print("done!")
 
 ###record each word and its sentiment
