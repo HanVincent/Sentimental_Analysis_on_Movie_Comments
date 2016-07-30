@@ -2,7 +2,7 @@ import numpy
 import urllib
 import scipy.optimize
 import random
-
+"""
 def parseData(fname):
   for l in urllib.request.urlopen(fname):
     yield eval(l)
@@ -15,7 +15,7 @@ def feature(datum):
   feat = [1]
   return feat
 
-X = [feature(d) for d in data]
+X = [feature(d) for d in data] #得到同樣數量的[1]
 y = [d['review/overall'] for d in data]
 theta,residuals,rank,s = numpy.linalg.lstsq(X, y)
 
@@ -23,7 +23,7 @@ theta,residuals,rank,s = numpy.linalg.lstsq(X, y)
 
 X = numpy.matrix(X)
 y = numpy.matrix(y)
-numpy.linalg.inv(X.T * X) * X.T * y.T
+z = numpy.linalg.inv(X.T * X) * X.T * y.T #得到的結果和上面的theta一樣
 
 ### Do older people rate beer more highly? ###
 
@@ -53,13 +53,13 @@ def feature(datum):
 X = [feature(d) for d in data2]
 y = [d['review/overall'] for d in data2]
 theta,residuals,rank,s = numpy.linalg.lstsq(X, y)
-
+"""
 ### Gradient descent ###
 
 # Objective
 def f(theta, X, y, lam):
   theta = numpy.matrix(theta).T
-  print(theta)
+  #print(theta)
   X = numpy.matrix(X)
   y = numpy.matrix(y).T
   diff = X*theta - y
@@ -71,21 +71,23 @@ def f(theta, X, y, lam):
 # Derivative
 def fprime(theta, X, y, lam):
   theta = numpy.matrix(theta).T
-  print(theta)
+  #print(theta)
   X = numpy.matrix(X)
   y = numpy.matrix(y).T
   diff = X*theta - y
   res = 2*X.T*diff / len(X) + 2*lam*theta
-  print("gradient =", numpy.array(res.flatten().tolist()[0]))
+  #print("gradient =", numpy.array(res.flatten().tolist()[0]))
   return numpy.array(res.flatten().tolist()[0])
 
-scipy.optimize.fmin_l_bfgs_b(f, [0,0], fprime, args = (X, y, 0.1))
+X = [[0,5,4,0,0,1,0,0,0,0,1],[0,0,0,6,0,2,0,0,0,0,1]]
+y = [5,2]
+a = scipy.optimize.fmin_l_bfgs_b(f, [0,0,0,0,0,0,0,0,0,0,0], fprime, args = (X, y, 0.1))
 
 ### Random features ###
-
+"""
 def feature(datum):
   return [random.random() for x in range(30)]
 
 X = [feature(d) for d in data2]
 y = [d['review/overall'] for d in data2]
-theta,residuals,rank,s = numpy.linalg.lstsq(X, y)
+theta,residuals,rank,s = numpy.linalg.lstsq(X, y)"""

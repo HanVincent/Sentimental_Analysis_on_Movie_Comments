@@ -39,7 +39,16 @@ def processData(dataset, select):
       line = ' '.join([stemmer.stem(w) for w in r_words])
       temp_data.append(line)    
     print("Remove stopwords")
-
+  
+  ### Just lowercase and remove stopwords
+  elif select == "5":
+    punctuation = set(string.punctuation)
+    for datum in dataset:
+      lower = ''.join([c for c in datum.lower() if not c in punctuation])
+      line = ' '.join([word for word in lower.split() if word not in stopwords.words('english')])      
+      temp_data.append(line)
+    print("Lowercase and Remove punct. and stopwords.")
+    
   return temp_data
 
 ###########################################################################
