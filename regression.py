@@ -1,199 +1,121 @@
 # -*- coding: utf-8 -*-
-"""
-Try to use Regression to classify the sentimental analysis.
-y = x * theta
-"""
-import numpy
 from process import *
-from collections import defaultdict
-#import string
-from nltk.stem.porter import *
-from nltk.corpus import stopwords
-from sklearn import linear_model
-from sklearn import svm
-from scipy import sparse
+from grad import *
+"""
+Process & Gram
+1.Original    2.Lowercase and remove punct.   3.plus stemming
+4.remove stopwords   5.Lowercase and Remove stopwords
 
-num = [5000]
-g = "1"
-for n in num:
-    for a in range(1,2):
-        name = g + "_"+ str(n) +"_" + str(a) + ".csv"
-        dict_name = "dict_" + g + "_" + str(n) + "_" + str(a) + ".csv"
-        gram_select = g
-        select = str(a)
+1.Unigram  2.Bigram  3.Trigram
+4.Unigram + Bigram
+5.Unigram + Bigram + Trigram
+"""
+selects = range(1, 2)
+gram_selects = range(2, 6)
+number = range(1000, 23000, 2000)
+for select in selects:
+    ################# TRAINING DATA ####################
+    # Read the training data
+    print("Reading training data...")
+    data = list(open("train.tsv", "r"))[1:]
+    print("done")
+    
+    # Transform the data structure
+    p_data = []
+    p_data_v = []
+    for d in data:
+        col = d.split('\t')
+        p_data.append(col[2])
+        p_data_v.append(float(col[3].strip()))
         
-        ### Read the training data
-        print("Reading data...")
-        data = list(open("train.tsv", "r"))[1:]
-        print("done")
+    # Process data and N-gram
+    p_data = processData(p_data, select)
+    
+    ################# TEST DATA ####################
+    # Read test data
+    print("Reading test data...")
+    test_data = list(open("test.tsv", "r"))[1:]
+    print("done")
         
-        ### Process the data structure
-        p_data = []
-        p_data_v = []
-        for d in data:
-            col = d.split('\t')
-            p_data.append(col[2])
-            p_data_v.append(float(col[3].strip()))
-            
-        ### Process
-        print("1.Original\n2.Lowercase and remove punct.\n3.plus stemming\n4.remove stopwords\n5.Lowercase and Remove stopwords")
-        #select = str(input("Select: "))
+    # Transform the data structure
+    p_test_data = []
+    for d in test_data:
+        col = d.split('\t')
+        p_test_data.append(col[2])
         
-        ### Gram
-        print("1.Unigram\n2.Bigram\n3.Trigram\n4.Unigram + Bigram\n5.Unigram + Bigram + Trigram\n")
-        #gram_select = str(input("Select n-gram: "))
-        
-        p_data = processData(p_data, select)
+    # Process data 
+    p_test_data = processData(p_test_data, select)
+
+    ################# COUNT N-GRAM ################# 
+    for gram_select in gram_selects:
         wordCount = countWord(p_data, gram_select)
-        
-        ### Sort in order
         counts = [(wordCount[w], w) for w in wordCount]
         counts.sort()
         counts.reverse()
-        
-        #======================================================================#
-        ### Pick more effective words
-        """
-        words = []
-        for word in counts:
-          eachWord = word[1].split()
-          if len(eachWord) == 3:
-            if eachWord[0] in stopwords.words('english') and eachWord[1] in stopwords.words('english') and eachWord[2] in stopwords.words('englihs'):
-              continue
-            words.append(word)
-          elif len(eachWord) == 2:
-            if eachWord[0] in stopwords.words('english') or eachWord[1] in stopwords.words('english'):   
-              continue
-            words.append(word)
-          elif len(eachWord) == 1:
-            if eachWord[0] in stopwords.words('english'):
-              continue
-            words.append(word)
-        
-        words = [x[1] for x in words[:n]]
-        """
-        words = [x[1] for x in counts[:n]]
-        
-        #======================================================================#
-        
-        ### Sentiment analysis
-        wordId = dict(zip(words, range(len(words))))# a:0, the:1...
-        
-        def feature(datum, gram_select):
-          feat = [0] * len(words)
-        
-          ### Unigram
-          if gram_select == "1":
-            for w in datum.split():
-              if w in words:
-                feat[wordId[w]] += 1
-                
-          ### Bigram
-          if gram_select == "2":
-            w_split = datum.split()    
-            for index in range(len(w_split)-1):
-              w = ' '.join([w_split[index], w_split[index+1]])
-              if w in words:
-                feat[wordId[w]] += 1
-                
-          ### Trigram
-          if gram_select == "3":
-            w_split = datum.split()
-            for index in range(len(w_split)-2):
-              w = ' '.join([w_split[index], w_split[index+1], w_split[index+2]])
-              if w in words:
-                feat[wordId[w]] += 1
-              
-          ### Unigram + Bigram
-          if gram_select == "4":
-            w_split = datum.split()
-            for index in range(len(w_split)-1):
-              w = ' '.join([w_split[index], w_split[index+1]])
-              if w in words:
-                feat[wordId[w]] += 1
-              if w_split[index] in words:
-                feat[wordId[w_split[index]]] += 1
-            if len(w_split) > 0 and w_split[len(w_split)-1] in words:
-              feat[wordId[w_split[len(w_split)-1]]] += 1
-              
-          ### Unigram + Bigram + Trigram
-          if gram_select == "5":
-            w_split = datum.split()
-            for index in range(len(w_split)-2):
-              w = ' '.join([w_split[index], w_split[index+1], w_split[index+2]]) #Trigram
-              if w in words: 
-                feat[wordId[w]] += 1
-              w = ' '.join([w_split[index], w_split[index+1]]) #Bigram
-              if w in words: 
-                feat[wordId[w]] += 1
-              w = w_split[index] #Unigram
-              if w in words:
-                feat[wordId[w]] += 1
             
-            if len(w_split) > 1: #Last bigram term
-              w = ' '.join([w_split[len(w_split)-2], w_split[len(w_split)-1]])
-              if w in words:
-                  feat[wordId[w]] += 1
-        
-            if len(w_split) > 0: #Last unigram term
-              if w_split[len(w_split)-2] in words:
-                feat[wordId[w_split[len(w_split)-2]]] += 1 
-              if w_split[len(w_split)-1] in words:
-                feat[wordId[w_split[len(w_split)-1]]] += 1
-         
-          feat.append(1)          
-          return feat
-          
-        ### Setting y = X * theta
-        X = [feature(datum, gram_select) for datum in p_data]
-        y = [v for v in p_data_v]
-
-        ### Training
-        clf = linear_model.Ridge(1.0, fit_intercept=False)
-        clf.fit(X, y)  
-        theta = clf.coef_
-        
-        ### Write dictionary(model)
-        fw = open(dict_name, "w")
-        for index in range(len(words)):
-            fw.write(words[index])
-            fw.write(",")
-            fw.write(str(theta[index]))
-            fw.write("\n")
-        fw.close()
-        
-        ### Read test data
-        print("Reading test data...")
-        test_data = list(open("test.tsv", "r"))[1:]
-        print("done")
-        
-        p_test_data = []
-        for d in test_data:
-            col = d.split('\t')
-            p_test_data.append(col[2])
-        
-        ### Process  
-        p_test_data = processData(p_test_data, select)
-          
-        ### Comparing string
-        test_X = [feature(datum, gram_select) for datum in p_test_data]
-        
-        ### Predict
-        predictions = numpy.round(clf.predict(test_X))
-        
-        ### Write file
-        fw = open(name, "w")
-        fw.write("PhraseId,Sentiment\n")
-        for index in range(len(test_data)):
-            fw.write(test_data[index].split('\t')[0] + ",")
+        ################# MAKE DICTIONARY #################
+        for n in number:
+            """
+            words = []
+            for word in counts:
+                eachWord = word[1].split()
+                if len(eachWord) == 3:
+                    if eachWord[0] in stopwords.words('english') and eachWord[1] in stopwords.words('english') and eachWord[2] in stopwords.words('english'):
+                        continue
+                    words.append(word)
+                elif len(eachWord) == 2:
+                    if eachWord[0] in stopwords.words('english') or eachWord[1] in stopwords.words('english'):   
+                        continue
+                    words.append(word)
+                elif len(eachWord) == 1:
+                    if eachWord[0] in stopwords.words('english'):
+                        continue
+                    words.append(word)
+                
+            words = [x[1] for x in words[:n]]
+            """
+            words = [x[1] for x in counts[:n]]
+                
+            ################# CREATE FEATURE #################
+            wordId = dict(zip(words, range(len(words))))# a:0, the:1...
+       
+            X = [feature(datum, gram_select, wordId) for datum in p_data]
+            y = [v for v in p_data_v]
             
-            if predictions[index] < 0:
-                fw.write("0")
-            elif predictions[index] > 4:
-                fw.write("4")
-            else:
-                fw.write(str(int(predictions[index]))) 
+            ################# TRAINING #################
+            theta = [0] * (n+1)
+            theta = scipy.optimize.fmin_l_bfgs_b(f, theta, fprime, args = (X, y, 0))
+            theta = theta[0]
+            print(theta)
+            
+            ################# PREDICTING #################
+            test_X = [feature(datum, gram_select, wordId) for datum in p_test_data]
+            
+            predictions = predict(test_X, theta)
+            
+            ################# WRITE FILE #################
+            name = "Results/" + str(select) + "_"+ str(gram_select) +"_" + str(n) + ".csv"
+            fw = open(name, "w")
+            fw.write("PhraseId,Sentiment\n")
+            for index in range(len(test_data)):
+                fw.write(test_data[index].split('\t')[0] + ",")
+                   
+                if predictions[index] < 0:
+                    fw.write("0")
+                elif predictions[index] > 4:
+                    fw.write("4")
+                else:
+                    fw.write(str(int(round(predictions[index]))))
+                
+                fw.write("\n")
+            fw.close()
         
-            fw.write("\n")
-        fw.close()
-        
+            # dictionary(model)
+            dict_name = "dictionary/" + str(select) + "_"+ str(gram_select) +"_" + str(n) + ".csv"
+            fw = open(dict_name, "w")
+            for index in range(len(words)):
+                fw.write(words[index])
+                fw.write(",")
+                fw.write(str(theta[index]))
+                fw.write("\n")
+            fw.close()

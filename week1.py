@@ -81,8 +81,8 @@ def fprime(theta, X, y, lam):
 
 X = [[0,5,4,0,0,1,0,0,0,0,1],[0,0,0,6,0,2,0,0,0,0,1]]
 y = [5,2]
-a = scipy.optimize.fmin_l_bfgs_b(f, [0,0,0,0,0,0,0,0,0,0,0], fprime, args = (X, y, 0.1))
-
+a = scipy.optimize.fmin_l_bfgs_b(f, [0,0,0,0,0,0,0,0,0,0,0], fprime, args = (X, y, 0.01))
+print(a)
 ### Random features ###
 """
 def feature(datum):
