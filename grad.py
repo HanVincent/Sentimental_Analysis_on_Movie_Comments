@@ -14,12 +14,14 @@ def Gradient(theta, X, y, lam):
 def f(theta, X, y, lam):
     # diff = X*theta - y
     diff = []
-    for index, eachDict in enumerate(X):
+    index = 0
+    for eachDict in X:
         temp = 0 #store the i,jth number
         for k, v in eachDict.items():
             temp += v * theta[k]
             
         diff.append(temp - y[index])
+        index = index + 1
         
     # diffSq = diff.T * diff
     diff = numpy.matrix(diff)    
@@ -33,20 +35,24 @@ def f(theta, X, y, lam):
 def fprime(theta, X, y, lam): 
     # diff = X*theta - y
     diff = []
-    for index, eachDict in enumerate(X):
+    index = 0
+    for eachDict in X:
         temp = 0
         for k, v in eachDict.items():
             temp += v * theta[k]
             
         diff.append(temp - y[index])
+        index = index + 1
 
     # res = 2*X.T*diff / len(X) + 2*lam*theta
     len_X = len(X)
     res = [0] * len(theta)
-    for index, eachDict in enumerate(X):
+    index = 0
+    for eachDict in X:
         for k, v in eachDict.items():
             res[k] += 2 * v * diff[index] / len_X
-    
+        index = index + 1
+        
     res = numpy.matrix(res)
     res = res + 2 * lam * theta 
     
@@ -56,10 +62,12 @@ def fprime(theta, X, y, lam):
 ### Predict
 def predict(test_X, theta):
     y = [0] * len(test_X)
-    for index, eachDict in enumerate(test_X):
+    index = 0
+    for eachDict in test_X:
         for k, v in eachDict.items():
             y[index] += v * theta[k]
-    
+        index = index + 1
+        
     return(y)    
 
 ### Main Test

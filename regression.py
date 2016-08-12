@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from process import *
 from grad import *
+
 """
 Process & Gram
 1.Original    2.Lowercase and remove punct.   3.plus stemming
@@ -10,9 +11,11 @@ Process & Gram
 4.Unigram + Bigram
 5.Unigram + Bigram + Trigram
 """
-selects = range(1, 2)
-gram_selects = range(2, 6)
-number = range(1000, 23000, 2000)
+
+newFeature = 3
+selects = range(2, 3)
+gram_selects = range(1, 2)
+number = range(5000, 6000, 1000)
 for select in selects:
     ################# TRAINING DATA ####################
     # Read the training data
@@ -55,7 +58,7 @@ for select in selects:
             
         ################# MAKE DICTIONARY #################
         for n in number:
-            """
+            """ 
             words = []
             for word in counts:
                 eachWord = word[1].split()
@@ -64,7 +67,7 @@ for select in selects:
                         continue
                     words.append(word)
                 elif len(eachWord) == 2:
-                    if eachWord[0] in stopwords.words('english') or eachWord[1] in stopwords.words('english'):   
+                    if eachWord[0] in stopwords.words('english') and eachWord[1] in stopwords.words('english'):   
                         continue
                     words.append(word)
                 elif len(eachWord) == 1:
@@ -75,7 +78,16 @@ for select in selects:
             words = [x[1] for x in words[:n]]
             """
             words = [x[1] for x in counts[:n]]
-                
+            """            
+            words = []
+            for word in counts:
+                if word[1] in pos_dict:
+                    if "JJ" in pos_dict[word[1]] or "NN" in pos_dict[word[1]]:
+                        words.append(word[1])
+                    
+                if len(words) >= n:
+                    break
+            """
             ################# CREATE FEATURE #################
             wordId = dict(zip(words, range(len(words))))# a:0, the:1...
        
@@ -83,7 +95,7 @@ for select in selects:
             y = [v for v in p_data_v]
             
             ################# TRAINING #################
-            theta = [0] * (n+1)
+            theta = [0] * (n + newFeature)
             theta = scipy.optimize.fmin_l_bfgs_b(f, theta, fprime, args = (X, y, 0))
             theta = theta[0]
             print(theta)

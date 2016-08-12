@@ -2,6 +2,8 @@ from collections import defaultdict
 import string
 from nltk.corpus import stopwords
 from nltk.stem.porter import *
+from collections import defaultdict  
+import json
 
 def processData(dataset, select):
     temp_data = []
@@ -116,15 +118,36 @@ def countWord(dataset, select):
     return wordCount
 
 ###########################################################################
-
+pos_dict = defaultdict(list)
+with open('pos_dict.json', 'r') as fp:
+    pos_dict = json.load(fp)
+    
 def feature(datum, gram_select, wordId):
     feat = defaultdict(int)
+    JJcount = 0
+    NNcount = 0
     
     ### Unigram
     if gram_select == 1:
         for w in datum.split():
+            if w in pos_dict and "JJ" in pos_dict[w]:
+                JJcount = JJcount + 1
+                
+        length = len(datum.split())
+        for w in datum.split():
             if w in wordId:
                 feat[wordId[w]] += 1
+
+                if w in pos_dict and "JJ" in pos_dict[w]:
+                    feat[wordId[w]] += 1 * (JJcount / length)
+                    
+                    #feat[wordId[w]] += 1 
+                """
+                    
+                if w in pos_dict and "NN" in pos_dict[w]:
+                    NNcount = NNcount + 1
+                    feat[wordId[w]] += 0.2
+                """
                 
     ### Bigram
     if gram_select == 2:
@@ -179,5 +202,7 @@ def feature(datum, gram_select, wordId):
                 if w_split[len(w_split)-1] in wordId:
                     feat[wordId[w_split[len(w_split)-1]]] += 1
          
-    feat[len(wordId)] = 1
+    feat[len(wordId)] = NNcount
+    feat[len(wordId)+1] = JJcount
+    feat[len(wordId)+2] = 1
     return feat
